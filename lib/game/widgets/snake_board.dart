@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/position.dart';
@@ -59,6 +56,7 @@ class SnakeBoardPainter extends CustomPainter {
     Size size,
   ) {
     final paint = Paint()
+      ..color = const Color(0xFF101010)
       ..style = PaintingStyle.fill;
 
     canvas.drawRect(
@@ -73,6 +71,7 @@ class SnakeBoardPainter extends CustomPainter {
     double cellSize,
   ) {
     final paint = Paint()
+      ..color = const Color(0xFF252525)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 
@@ -102,6 +101,7 @@ class SnakeBoardPainter extends CustomPainter {
     double cellSize,
   ) {
     final paint = Paint()
+      ..color = const Color(0xFF4CAF50)
       ..style = PaintingStyle.fill;
 
     for (var index = 0; index < snake.length; index++) {
@@ -129,6 +129,7 @@ class SnakeBoardPainter extends CustomPainter {
     double cellSize,
   ) {
     final paint = Paint()
+      ..color = const Color(0xFFE53935)
       ..style = PaintingStyle.fill;
 
     final center = Offset(
@@ -147,7 +148,7 @@ class SnakeBoardPainter extends CustomPainter {
   bool shouldRepaint(
     covariant SnakeBoardPainter oldDelegate,
   ) {
-    return !listEquals(oldDelegate.snake, snake) ||
+    return oldDelegate.snake != snake ||
         oldDelegate.food != food ||
         oldDelegate.boardSize != boardSize;
   }

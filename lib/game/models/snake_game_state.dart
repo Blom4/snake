@@ -5,12 +5,9 @@ import 'position.dart';
 
 part 'snake_game_state.freezed.dart';
 
-enum GameStatus {
-  ready,
-  playing,
-  paused,
-  gameOver,
-}
+enum GameDifficulty { easy, normal, hard }
+
+enum GameStatus { ready, playing, paused, gameOver }
 
 @freezed
 abstract class SnakeGameState with _$SnakeGameState {
@@ -20,5 +17,6 @@ abstract class SnakeGameState with _$SnakeGameState {
     required Direction direction,
     required GameStatus status,
     required int score,
+    required GameDifficulty difficulty,
   }) = _SnakeGameState;
 }

@@ -14,6 +14,8 @@ class SnakeGame extends _$SnakeGame {
   static const boardWidth = 20;
   static const boardHeight = 20;
 
+  // static const tickDuration = Duration(milliseconds: 150);
+
   Timer? _timer;
 
   final Random _random = Random();
@@ -34,24 +36,48 @@ class SnakeGame extends _$SnakeGame {
       direction: Direction.right,
       status: GameStatus.ready,
       score: 0,
+      difficulty: GameDifficulty.normal,
     );
   }
 
-  void start() {
+  void setDifficulty(GameDifficulty difficulty) {
     if (state.status == GameStatus.playing) {
       return;
     }
 
-    state = state.copyWith(
-      status: GameStatus.playing,
-    );
+    state = state.copyWith(difficulty: difficulty);
+  }
 
-    _timer?.cancel();
+  Duration get _tickDuration {
+    final baseSpeed = switch (state.difficulty) {
+      GameDifficulty.easy => 220,
+      GameDifficulty.normal => 150,
+      GameDifficulty.hard => 90,
+    };
 
-    _timer = Timer.periodic(
-      const Duration(milliseconds: 150),
-      (_) => _tick(),
-    );
+    final speedIncrease = (_level - 1) * 10;
+
+    final milliseconds = baseSpeed - speedIncrease;
+
+    return Duration(milliseconds: milliseconds.clamp(50, 220));
+  }
+
+  int get _level {
+    return (state.score ~/ 5) + 1;
+  }
+
+  void start() {
+    if (state.status == GameStatus.gameOver) {
+      reset();
+    }
+
+    if (state.status == GameStatus.playing) {
+      return;
+    }
+
+    state = state.copyWith(status: GameStatus.playing);
+
+    _restartTimer();
   }
 
   void pause() {
@@ -61,9 +87,7 @@ class SnakeGame extends _$SnakeGame {
 
     _timer?.cancel();
 
-    state = state.copyWith(
-      status: GameStatus.paused,
-    );
+    state = state.copyWith(status: GameStatus.paused);
   }
 
   void reset() {
@@ -79,6 +103,7 @@ class SnakeGame extends _$SnakeGame {
       direction: Direction.right,
       status: GameStatus.ready,
       score: 0,
+      difficulty: GameDifficulty.normal,
     );
   }
 
@@ -87,23 +112,14 @@ class SnakeGame extends _$SnakeGame {
       return;
     }
 
-    state = state.copyWith(
-      direction: direction,
-    );
+    state = state.copyWith(direction: direction);
   }
 
-  bool _isOpposite(
-    Direction current,
-    Direction next,
-  ) {
-    return (current == Direction.up &&
-            next == Direction.down) ||
-        (current == Direction.down &&
-            next == Direction.up) ||
-        (current == Direction.left &&
-            next == Direction.right) ||
-        (current == Direction.right &&
-            next == Direction.left);
+  bool _isOpposite(Direction current, Direction next) {
+    return (current == Direction.up && next == Direction.down) ||
+        (current == Direction.down && next == Direction.up) ||
+        (current == Direction.left && next == Direction.right) ||
+        (current == Direction.right && next == Direction.left);
   }
 
   void _tick() {
@@ -114,35 +130,20 @@ class SnakeGame extends _$SnakeGame {
     final head = state.snake.first;
 
     final newHead = switch (state.direction) {
-      Direction.up => Position(
-          x: head.x,
-          y: head.y - 1,
-        ),
-      Direction.down => Position(
-          x: head.x,
-          y: head.y + 1,
-        ),
-      Direction.left => Position(
-          x: head.x - 1,
-          y: head.y,
-        ),
-      Direction.right => Position(
-          x: head.x + 1,
-          y: head.y,
-        ),
+      Direction.up => Position(x: head.x, y: head.y - 1),
+      Direction.down => Position(x: head.x, y: head.y + 1),
+      Direction.left => Position(x: head.x - 1, y: head.y),
+      Direction.right => Position(x: head.x + 1, y: head.y),
     };
 
-    if (_isCollision(newHead)) {
+    final ateFood = newHead == state.food;
+
+    if (_isCollision(newHead, willGrow: ateFood)) {
       _gameOver();
       return;
     }
 
-    final ateFood = newHead == state.food;
-
-    final newSnake = [
-      newHead,
-      ...state.snake,
-    ];
+    final newSnake = [newHead, ...state.snake];
 
     if (!ateFood) {
       newSnake.removeLast();
@@ -150,16 +151,22 @@ class SnakeGame extends _$SnakeGame {
 
     state = state.copyWith(
       snake: newSnake,
-      food: ateFood
-          ? _generateFood(newSnake)
-          : state.food,
-      score: ateFood
-          ? state.score + 1
-          : state.score,
+      food: ateFood ? _generateFood(newSnake) : state.food,
+      score: ateFood ? state.score + 1 : state.score,
     );
+
+    if (ateFood) {
+      _restartTimer();
+    }
   }
 
-  bool _isCollision(Position position) {
+  void _restartTimer() {
+    _timer?.cancel();
+
+    _timer = Timer.periodic(_tickDuration, (_) => _tick());
+  }
+
+  bool _isCollision(Position position, {required bool willGrow}) {
     // Wall collision.
     if (position.x < 0 ||
         position.x >= boardWidth ||
@@ -168,8 +175,13 @@ class SnakeGame extends _$SnakeGame {
       return true;
     }
 
-    // Snake collision.
-    return state.snake.contains(position);
+    // If the snake is not growing, its tail will move away
+    // during this tick, so don't treat the tail as a collision.
+    final body = willGrow
+        ? state.snake
+        : state.snake.sublist(0, state.snake.length - 1);
+
+    return body.contains(position);
   }
 
   Position _generateFood(List<Position> snake) {
@@ -188,8 +200,6 @@ class SnakeGame extends _$SnakeGame {
   void _gameOver() {
     _timer?.cancel();
 
-    state = state.copyWith(
-      status: GameStatus.gameOver,
-    );
+    state = state.copyWith(status: GameStatus.gameOver);
   }
 }

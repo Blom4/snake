@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SnakeGameState {
 
- List<Position> get snake; Position get food; Direction get direction; GameStatus get status; int get score;
+ List<Position> get snake; Position get food; Direction get direction; GameStatus get status; int get score; GameDifficulty get difficulty;
 /// Create a copy of SnakeGameState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $SnakeGameStateCopyWith<SnakeGameState> get copyWith => _$SnakeGameStateCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as SnakeGameState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SnakeGameState&&const DeepCollectionEquality().equals(other.snake, _this.snake)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.direction, _this.direction) || other.direction == _this.direction)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.score, _this.score) || other.score == _this.score));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SnakeGameState&&const DeepCollectionEquality().equals(other.snake, _this.snake)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.direction, _this.direction) || other.direction == _this.direction)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.difficulty, _this.difficulty) || other.difficulty == _this.difficulty));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SnakeGameState;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.snake),_this.food,_this.direction,_this.status,_this.score);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.snake),_this.food,_this.direction,_this.status,_this.score,_this.difficulty);
 }
 
 @override
 String toString() {
   final _this = this as SnakeGameState;
-  return 'SnakeGameState(snake: ${_this.snake}, food: ${_this.food}, direction: ${_this.direction}, status: ${_this.status}, score: ${_this.score})';
+  return 'SnakeGameState(snake: ${_this.snake}, food: ${_this.food}, direction: ${_this.direction}, status: ${_this.status}, score: ${_this.score}, difficulty: ${_this.difficulty})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $SnakeGameStateCopyWith<$Res>  {
   factory $SnakeGameStateCopyWith(SnakeGameState value, $Res Function(SnakeGameState) _then) = _$SnakeGameStateCopyWithImpl;
 @useResult
 $Res call({
- List<Position> snake, Position food, Direction direction, GameStatus status, int score
+ List<Position> snake, Position food, Direction direction, GameStatus status, int score, GameDifficulty difficulty
 });
 
 
@@ -68,14 +68,15 @@ class _$SnakeGameStateCopyWithImpl<$Res>
 
 /// Create a copy of SnakeGameState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? snake = null,Object? food = null,Object? direction = null,Object? status = null,Object? score = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? snake = null,Object? food = null,Object? direction = null,Object? status = null,Object? score = null,Object? difficulty = null,}) {
   return _then(SnakeGameState(
 snake: null == snake ? _self.snake : snake // ignore: cast_nullable_to_non_nullable
 as List<Position>,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as Position,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as Direction,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as GameStatus,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
-as int,
+as int,difficulty: null == difficulty ? _self.difficulty : difficulty // ignore: cast_nullable_to_non_nullable
+as GameDifficulty,
   ));
 }
 /// Create a copy of SnakeGameState
@@ -169,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Position> snake,  Position food,  Direction direction,  GameStatus status,  int score)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Position> snake,  Position food,  Direction direction,  GameStatus status,  int score,  GameDifficulty difficulty)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SnakeGameState() when $default != null:
-return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score);case _:
+return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score,_that.difficulty);case _:
   return orElse();
 
 }
@@ -190,10 +191,10 @@ return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score)
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Position> snake,  Position food,  Direction direction,  GameStatus status,  int score)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Position> snake,  Position food,  Direction direction,  GameStatus status,  int score,  GameDifficulty difficulty)  $default,) {final _that = this;
 switch (_that) {
 case _SnakeGameState():
-return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score);case _:
+return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score,_that.difficulty);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +211,10 @@ return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score)
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Position> snake,  Position food,  Direction direction,  GameStatus status,  int score)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Position> snake,  Position food,  Direction direction,  GameStatus status,  int score,  GameDifficulty difficulty)?  $default,) {final _that = this;
 switch (_that) {
 case _SnakeGameState() when $default != null:
-return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score);case _:
+return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score,_that.difficulty);case _:
   return null;
 
 }
@@ -225,7 +226,7 @@ return $default(_that.snake,_that.food,_that.direction,_that.status,_that.score)
 
 
 class _SnakeGameState implements SnakeGameState {
-  const _SnakeGameState({required  List<Position> snake, required this.food, required this.direction, required this.status, required this.score}): _snake = snake;
+  const _SnakeGameState({required  List<Position> snake, required this.food, required this.direction, required this.status, required this.score, required this.difficulty}): _snake = snake;
   
 
  final  List<Position> _snake;
@@ -239,6 +240,7 @@ class _SnakeGameState implements SnakeGameState {
 @override final  Direction direction;
 @override final  GameStatus status;
 @override final  int score;
+@override final  GameDifficulty difficulty;
 
 /// Create a copy of SnakeGameState
 /// with the given fields replaced by the non-null parameter values.
@@ -250,18 +252,18 @@ _$SnakeGameStateCopyWith<_SnakeGameState> get copyWith => __$SnakeGameStateCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SnakeGameState&&const DeepCollectionEquality().equals(other.snake, _snake)&&(identical(other.food, food) || other.food == food)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.status, status) || other.status == status)&&(identical(other.score, score) || other.score == score));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SnakeGameState&&const DeepCollectionEquality().equals(other.snake, _snake)&&(identical(other.food, food) || other.food == food)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.status, status) || other.status == status)&&(identical(other.score, score) || other.score == score)&&(identical(other.difficulty, difficulty) || other.difficulty == difficulty));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_snake),food,direction,status,score);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_snake),food,direction,status,score,difficulty);
 }
 
 @override
 String toString() {
-    return 'SnakeGameState(snake: $snake, food: $food, direction: $direction, status: $status, score: $score)';
+    return 'SnakeGameState(snake: $snake, food: $food, direction: $direction, status: $status, score: $score, difficulty: $difficulty)';
 }
 
 
@@ -272,7 +274,7 @@ abstract mixin class _$SnakeGameStateCopyWith<$Res> implements $SnakeGameStateCo
   factory _$SnakeGameStateCopyWith(_SnakeGameState value, $Res Function(_SnakeGameState) _then) = __$SnakeGameStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Position> snake, Position food, Direction direction, GameStatus status, int score
+ List<Position> snake, Position food, Direction direction, GameStatus status, int score, GameDifficulty difficulty
 });
 
 
@@ -289,14 +291,15 @@ class __$SnakeGameStateCopyWithImpl<$Res>
 
 /// Create a copy of SnakeGameState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? snake = null,Object? food = null,Object? direction = null,Object? status = null,Object? score = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? snake = null,Object? food = null,Object? direction = null,Object? status = null,Object? score = null,Object? difficulty = null,}) {
   return _then(_SnakeGameState(
 snake: null == snake ? _self._snake : snake // ignore: cast_nullable_to_non_nullable
 as List<Position>,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as Position,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
 as Direction,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as GameStatus,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
-as int,
+as int,difficulty: null == difficulty ? _self.difficulty : difficulty // ignore: cast_nullable_to_non_nullable
+as GameDifficulty,
   ));
 }
 

@@ -20,6 +20,8 @@ class SnakeGame extends _$SnakeGame {
 
   final Random _random = Random();
 
+  Direction? _nextDirection;
+
   @override
   SnakeGameState build() {
     ref.onDispose(() {
@@ -93,6 +95,8 @@ class SnakeGame extends _$SnakeGame {
   void reset() {
     _timer?.cancel();
 
+    _nextDirection = null;
+
     state = const SnakeGameState(
       snake: [
         Position(x: 10, y: 10),
@@ -108,11 +112,13 @@ class SnakeGame extends _$SnakeGame {
   }
 
   void changeDirection(Direction direction) {
-    if (_isOpposite(state.direction, direction)) {
+    final currentDirection = _nextDirection ?? state.direction;
+
+    if (_isOpposite(currentDirection, direction)) {
       return;
     }
 
-    state = state.copyWith(direction: direction);
+    _nextDirection = direction;
   }
 
   bool _isOpposite(Direction current, Direction next) {
@@ -126,6 +132,10 @@ class SnakeGame extends _$SnakeGame {
     if (state.status != GameStatus.playing) {
       return;
     }
+
+    final direction = _nextDirection ?? state.direction;
+
+    _nextDirection = null;
 
     final head = state.snake.first;
 
@@ -151,6 +161,7 @@ class SnakeGame extends _$SnakeGame {
 
     state = state.copyWith(
       snake: newSnake,
+      direction: direction,
       food: ateFood ? _generateFood(newSnake) : state.food,
       score: ateFood ? state.score + 1 : state.score,
     );

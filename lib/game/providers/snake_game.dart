@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:snake/game/commands/game_command.dart';
+import 'package:snake/game/events/game_event.dart';
 
 import '../models/direction.dart';
 import '../models/position.dart';
@@ -24,12 +26,34 @@ class SnakeGame extends _$SnakeGame {
 
   Direction? _nextDirection;
 
+  final StreamController<GameEvent> _eventController =
+      StreamController<GameEvent>.broadcast();
+
+  Stream<GameEvent> get events => _eventController.stream;
+
   SnakeGameState build() {
     ref.onDispose(() {
       _timer?.cancel();
+      _eventController.close();
     });
 
     return _engine.createInitialState();
+  }
+
+  void dispatch(GameCommand command) {
+    switch (command) {
+      case StartGame():
+        start();
+
+      case PauseGame():
+        pause();
+
+      case ResetGame():
+        reset();
+
+      case ChangeDirection(:final direction):
+        changeDirection(direction);
+    }
   }
 
   void setDifficulty(GameDifficulty difficulty) {
@@ -116,7 +140,11 @@ class SnakeGame extends _$SnakeGame {
 
     final previousScore = state.score;
 
-    state = _engine.tick(state);
+    final result = _engine.tick(state);
+
+    state = result.state;
+
+    _handleEvents(result.events);
 
     if (state.status == GameStatus.gameOver) {
       _timer?.cancel();
@@ -125,6 +153,12 @@ class SnakeGame extends _$SnakeGame {
 
     if (state.score != previousScore) {
       _restartTimer();
+    }
+  }
+
+  void _handleEvents(List<GameEvent> events) {
+    for (final event in events) {
+      _eventController.add(event);
     }
   }
 

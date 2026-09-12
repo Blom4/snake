@@ -4,6 +4,9 @@ import '../models/direction.dart';
 import '../models/position.dart';
 import '../models/snake_game_state.dart';
 
+import '../events/game_event.dart';
+import 'snake_tick_result.dart';
+
 class SnakeGameEngine {
   SnakeGameEngine({this.boardWidth = 20, this.boardHeight = 20, Random? random})
     : _random = random ?? Random();
@@ -60,13 +63,15 @@ class SnakeGameEngine {
     };
   }
 
-  SnakeGameState tick(SnakeGameState state) {
+  SnakeTickResult tick(SnakeGameState state) {
+    final events = <GameEvent>[];
     final newHead = calculateNextHead(state, state.direction);
-
     final ateFood = newHead == state.food;
 
     if (isCollision(state, newHead, willGrow: ateFood)) {
-      return state.copyWith(status: GameStatus.gameOver);
+      final newState = state.copyWith(status: GameStatus.gameOver);
+      events.add(const GameEvent.gameOver());
+      return SnakeTickResult(state: newState, events: events);
     }
 
     final newSnake = [newHead, ...state.snake];
@@ -75,11 +80,27 @@ class SnakeGameEngine {
       newSnake.removeLast();
     }
 
-    return state.copyWith(
+    final newScore = ateFood ? state.score + 1 : state.score;
+
+    final oldLevel = (state.score ~/ 5) + 1;
+
+    final newLevel = (newScore ~/ 5) + 1;
+
+    final newState = state.copyWith(
       snake: newSnake,
       food: ateFood ? generateFood(newSnake) : state.food,
-      score: ateFood ? state.score + 1 : state.score,
+      score: newScore,
     );
+
+    if (ateFood) {
+      events.add(GameEvent.foodEaten(score: newScore));
+    }
+
+    if (newLevel != oldLevel) {
+      events.add(GameEvent.levelChanged(level: newLevel));
+    }
+
+    return SnakeTickResult(state: newState, events: events);
   }
 
   Position generateFood(List<Position> snake) {

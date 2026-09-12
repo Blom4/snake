@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:snake/game/commands/game_command.dart';
+import 'package:snake/game/effects/game_effects.dart';
+import 'package:snake/game/events/game_event.dart';
+import 'package:snake/game/providers/snake_game_events.dart';
 
 import '../game/models/direction.dart';
 import '../game/models/snake_game_state.dart';
@@ -17,6 +21,7 @@ class SnakeScreen extends ConsumerStatefulWidget {
 
 class _SnakeScreenState extends ConsumerState<SnakeScreen>
     with WidgetsBindingObserver {
+  final GameEffects _effects = const GameEffects();
   @override
   void initState() {
     super.initState();
@@ -42,6 +47,38 @@ class _SnakeScreenState extends ConsumerState<SnakeScreen>
   @override
   Widget build(BuildContext context) {
     final game = ref.watch(snakeGameProvider);
+
+    ref.listen(snakeGameEventsProvider, (_, next) {
+      final event = next.value;
+
+      if (event == null) {
+        return;
+      }
+
+      _effects.handle(event);
+
+      switch (event) {
+        case FoodEaten(:final score):
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Food eaten! Score: $score'),
+              duration: const Duration(milliseconds: 500),
+            ),
+          );
+
+        case LevelChanged(:final level):
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Level $level!'),
+              duration: const Duration(milliseconds: 700),
+            ),
+          );
+
+        case GameOver():
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Game Over!')));
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Blomitek Snake'), centerTitle: true),
@@ -207,23 +244,33 @@ class _GameButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notifier = ref.watch(snakeGameProvider.notifier);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (status != GameStatus.playing)
           ElevatedButton(
-            onPressed: notifier.start,
+            onPressed: () => ref
+                .read(snakeGameProvider.notifier)
+                .dispatch(const GameCommand.start()),
             child: Text(status == GameStatus.gameOver ? 'Play Again' : 'Start'),
           ),
 
         if (status == GameStatus.playing)
-          ElevatedButton(onPressed: notifier.pause, child: const Text('Pause')),
+          ElevatedButton(
+            onPressed: () => ref
+                .read(snakeGameProvider.notifier)
+                .dispatch(const GameCommand.pause()),
+            child: const Text('Pause'),
+          ),
 
         const SizedBox(width: 10),
 
-        OutlinedButton(onPressed: notifier.reset, child: const Text('Reset')),
+        OutlinedButton(
+          onPressed: () => ref
+              .read(snakeGameProvider.notifier)
+              .dispatch(const GameCommand.reset()),
+          child: const Text('Reset'),
+        ),
       ],
     );
   }

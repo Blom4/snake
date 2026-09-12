@@ -31,6 +31,7 @@ class SnakeGame extends _$SnakeGame {
 
   Stream<GameEvent> get events => _eventController.stream;
 
+  @override
   SnakeGameState build() {
     ref.onDispose(() {
       _timer?.cancel();

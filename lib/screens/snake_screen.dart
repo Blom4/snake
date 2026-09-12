@@ -21,7 +21,7 @@ class SnakeScreen extends ConsumerStatefulWidget {
 
 class _SnakeScreenState extends ConsumerState<SnakeScreen>
     with WidgetsBindingObserver {
-  final GameEffects _effects = const GameEffects();
+  final GameEffects _effects = GameEffects();
   @override
   void initState() {
     super.initState();
@@ -32,6 +32,7 @@ class _SnakeScreenState extends ConsumerState<SnakeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _effects.dispose();
 
     super.dispose();
   }

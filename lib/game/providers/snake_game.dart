@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/direction.dart';
 import '../models/position.dart';
 import '../models/snake_game_state.dart';
+import '../engine/snake_game_engine.dart';
 
 part 'snake_game.g.dart';
 
@@ -15,6 +16,7 @@ class SnakeGame extends _$SnakeGame {
   static const boardHeight = 20;
 
   // static const tickDuration = Duration(milliseconds: 150);
+  final SnakeGameEngine _engine = SnakeGameEngine();
 
   Timer? _timer;
 
@@ -22,24 +24,12 @@ class SnakeGame extends _$SnakeGame {
 
   Direction? _nextDirection;
 
-  @override
   SnakeGameState build() {
     ref.onDispose(() {
       _timer?.cancel();
     });
 
-    return const SnakeGameState(
-      snake: [
-        Position(x: 10, y: 10),
-        Position(x: 9, y: 10),
-        Position(x: 8, y: 10),
-      ],
-      food: Position(x: 15, y: 10),
-      direction: Direction.right,
-      status: GameStatus.ready,
-      score: 0,
-      difficulty: GameDifficulty.normal,
-    );
+    return _engine.createInitialState();
   }
 
   void setDifficulty(GameDifficulty difficulty) {
@@ -88,44 +78,29 @@ class SnakeGame extends _$SnakeGame {
     }
 
     _timer?.cancel();
+    _nextDirection = null;
 
     state = state.copyWith(status: GameStatus.paused);
   }
 
   void reset() {
     _timer?.cancel();
-
     _nextDirection = null;
-
-    state = const SnakeGameState(
-      snake: [
-        Position(x: 10, y: 10),
-        Position(x: 9, y: 10),
-        Position(x: 8, y: 10),
-      ],
-      food: Position(x: 15, y: 10),
-      direction: Direction.right,
-      status: GameStatus.ready,
-      score: 0,
-      difficulty: GameDifficulty.normal,
-    );
+    state = _engine.createInitialState(difficulty: state.difficulty);
   }
 
   void changeDirection(Direction direction) {
+    if (state.status != GameStatus.playing) {
+      return;
+    }
+
     final currentDirection = _nextDirection ?? state.direction;
 
-    if (_isOpposite(currentDirection, direction)) {
+    if (_engine.isOpposite(currentDirection, direction)) {
       return;
     }
 
     _nextDirection = direction;
-  }
-
-  bool _isOpposite(Direction current, Direction next) {
-    return (current == Direction.up && next == Direction.down) ||
-        (current == Direction.down && next == Direction.up) ||
-        (current == Direction.left && next == Direction.right) ||
-        (current == Direction.right && next == Direction.left);
   }
 
   void _tick() {
@@ -137,36 +112,18 @@ class SnakeGame extends _$SnakeGame {
 
     _nextDirection = null;
 
-    final head = state.snake.first;
+    state = state.copyWith(direction: direction);
 
-    final newHead = switch (state.direction) {
-      Direction.up => Position(x: head.x, y: head.y - 1),
-      Direction.down => Position(x: head.x, y: head.y + 1),
-      Direction.left => Position(x: head.x - 1, y: head.y),
-      Direction.right => Position(x: head.x + 1, y: head.y),
-    };
+    final previousScore = state.score;
 
-    final ateFood = newHead == state.food;
+    state = _engine.tick(state);
 
-    if (_isCollision(newHead, willGrow: ateFood)) {
-      _gameOver();
+    if (state.status == GameStatus.gameOver) {
+      _timer?.cancel();
       return;
     }
 
-    final newSnake = [newHead, ...state.snake];
-
-    if (!ateFood) {
-      newSnake.removeLast();
-    }
-
-    state = state.copyWith(
-      snake: newSnake,
-      direction: direction,
-      food: ateFood ? _generateFood(newSnake) : state.food,
-      score: ateFood ? state.score + 1 : state.score,
-    );
-
-    if (ateFood) {
+    if (state.score != previousScore) {
       _restartTimer();
     }
   }
@@ -177,40 +134,9 @@ class SnakeGame extends _$SnakeGame {
     _timer = Timer.periodic(_tickDuration, (_) => _tick());
   }
 
-  bool _isCollision(Position position, {required bool willGrow}) {
-    // Wall collision.
-    if (position.x < 0 ||
-        position.x >= boardWidth ||
-        position.y < 0 ||
-        position.y >= boardHeight) {
-      return true;
-    }
+  // void _gameOver() {
+  //   _timer?.cancel();
 
-    // If the snake is not growing, its tail will move away
-    // during this tick, so don't treat the tail as a collision.
-    final body = willGrow
-        ? state.snake
-        : state.snake.sublist(0, state.snake.length - 1);
-
-    return body.contains(position);
-  }
-
-  Position _generateFood(List<Position> snake) {
-    while (true) {
-      final position = Position(
-        x: _random.nextInt(boardWidth),
-        y: _random.nextInt(boardHeight),
-      );
-
-      if (!snake.contains(position)) {
-        return position;
-      }
-    }
-  }
-
-  void _gameOver() {
-    _timer?.cancel();
-
-    state = state.copyWith(status: GameStatus.gameOver);
-  }
+  //   state = state.copyWith(status: GameStatus.gameOver);
+  // }
 }

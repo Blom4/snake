@@ -6,11 +6,41 @@ import '../game/models/snake_game_state.dart';
 import '../game/providers/snake_game.dart';
 import '../game/widgets/snake_board.dart';
 
-class SnakeScreen extends ConsumerWidget {
+class SnakeScreen extends ConsumerStatefulWidget {
   const SnakeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SnakeScreen> createState() {
+    return _SnakeScreenState();
+  }
+}
+
+class _SnakeScreenState extends ConsumerState<SnakeScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      ref.read(snakeGameProvider.notifier).pause();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final game = ref.watch(snakeGameProvider);
 
     return Scaffold(

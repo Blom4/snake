@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:snake/game/engine/snake_game_engine.dart';
+import 'package:snake/game/events/game_event.dart';
 import 'package:snake/game/models/direction.dart';
 import 'package:snake/game/models/snake_game_state.dart';
 import 'package:snake/game/models/position.dart';
@@ -27,11 +30,11 @@ void main() {
         status: GameStatus.playing,
       );
 
-      final nextState = engine.tick(state);
+      final result = engine.tick(state, Direction.right);
 
-      expect(nextState.snake.first.x, 11);
+      expect(result.state.snake.first.x, 11);
 
-      expect(nextState.snake.first.y, 10);
+      expect(result.state.snake.first.y, 10);
     });
 
     test('game over when snake hits wall', () {
@@ -44,9 +47,44 @@ void main() {
         ],
       );
 
-      final nextState = engine.tick(state);
+      final result = engine.tick(state, Direction.right);
 
-      expect(nextState.status, GameStatus.gameOver);
+      expect(result.state.status, GameStatus.gameOver);
     });
+  });
+
+  test('moves snake in the supplied direction', () {
+    final engine = SnakeGameEngine(random: Random(1));
+
+    final state = engine.createInitialState();
+
+    final result = engine.tick(state, Direction.down);
+
+    expect(result.state.snake.first, const Position(x: 10, y: 11));
+
+    expect(result.state.direction, Direction.down);
+  });
+
+  test('detects wall collision', () {
+    final engine = SnakeGameEngine(random: Random(1));
+
+    final state = SnakeGameState(
+      snake: const [
+        Position(x: 19, y: 10),
+        Position(x: 18, y: 10),
+        Position(x: 17, y: 10),
+      ],
+      food: const Position(x: 5, y: 5),
+      direction: Direction.right,
+      status: GameStatus.playing,
+      score: 0,
+      difficulty: GameDifficulty.normal,
+    );
+
+    final result = engine.tick(state, Direction.right);
+
+    expect(result.state.status, GameStatus.gameOver);
+
+    expect(result.events, contains(const GameEvent.gameOver()));
   });
 }

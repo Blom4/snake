@@ -9,10 +9,8 @@ import '../models/position.dart';
 import '../models/snake_game_state.dart';
 
 import '../events/game_event.dart';
-// ignore: unused_import
-import 'snake_tick_result.dart';
 
-class SnakeGameEngine implements GameEngine<SnakeGameState> {
+class SnakeGameEngine implements GameEngine<SnakeGameState, Direction> {
   SnakeGameEngine({SnakeGameConfig? config, Random? random})
     : config = config ?? const SnakeGameConfig(),
       _random = random ?? Random();
@@ -67,9 +65,12 @@ class SnakeGameEngine implements GameEngine<SnakeGameState> {
   }
 
   @override
-  GameTickResult<SnakeGameState> tick(SnakeGameState state) {
+  GameTickResult<SnakeGameState> tick(
+    SnakeGameState state,
+    Direction direction,
+  ) {
     final events = <GameEvent>[];
-    final newHead = calculateNextHead(state, state.direction);
+    final newHead = calculateNextHead(state, direction);
     final ateFood = newHead == state.food;
 
     if (isCollision(state, newHead, willGrow: ateFood)) {
@@ -92,6 +93,7 @@ class SnakeGameEngine implements GameEngine<SnakeGameState> {
     final newState = state.copyWith(
       snake: newSnake,
       food: ateFood ? generateFood(newSnake) : state.food,
+      direction: direction,
       score: newScore,
     );
 

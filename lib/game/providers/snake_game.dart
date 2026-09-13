@@ -130,7 +130,7 @@ class SnakeGame extends _$SnakeGame {
 
     final previousScore = state.score;
 
-    final result = _engine.tick(state);
+    final result = _engine.tick(state, direction);
 
     state = result.state;
 

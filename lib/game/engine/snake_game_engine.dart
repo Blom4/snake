@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:snake/game/config/snake_game_config.dart';
+
 import '../models/direction.dart';
 import '../models/position.dart';
 import '../models/snake_game_state.dart';
@@ -8,12 +10,10 @@ import '../events/game_event.dart';
 import 'snake_tick_result.dart';
 
 class SnakeGameEngine {
-  SnakeGameEngine({this.boardWidth = 20, this.boardHeight = 20, Random? random})
-    : _random = random ?? Random();
-
-  final int boardWidth;
-  final int boardHeight;
-
+  SnakeGameEngine({SnakeGameConfig? config, Random? random})
+    : config = config ?? const SnakeGameConfig(),
+      _random = random ?? Random();
+  final SnakeGameConfig config;
   final Random _random;
 
   SnakeGameState createInitialState({
@@ -39,9 +39,9 @@ class SnakeGameEngine {
     required bool willGrow,
   }) {
     if (position.x < 0 ||
-        position.x >= boardWidth ||
+        position.x >= config.boardWidth ||
         position.y < 0 ||
-        position.y >= boardHeight) {
+        position.y >= config.boardHeight) {
       return true;
     }
 
@@ -82,9 +82,8 @@ class SnakeGameEngine {
 
     final newScore = ateFood ? state.score + 1 : state.score;
 
-    final oldLevel = (state.score ~/ 5) + 1;
-
-    final newLevel = (newScore ~/ 5) + 1;
+    final oldLevel = config.levelForScore(state.score);
+    final newLevel = config.levelForScore(newScore);
 
     final newState = state.copyWith(
       snake: newSnake,
@@ -106,8 +105,8 @@ class SnakeGameEngine {
   Position generateFood(List<Position> snake) {
     while (true) {
       final position = Position(
-        x: _random.nextInt(boardWidth),
-        y: _random.nextInt(boardHeight),
+        x: _random.nextInt(config.boardWidth),
+        y: _random.nextInt(config.boardHeight),
       );
 
       if (!snake.contains(position)) {

@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:snake/game/commands/game_command.dart';
 import 'package:snake/game/events/game_event.dart';
 
 import '../models/direction.dart';
-import '../models/position.dart';
 import '../models/snake_game_state.dart';
 import '../engine/snake_game_engine.dart';
 
@@ -21,8 +19,6 @@ class SnakeGame extends _$SnakeGame {
   final SnakeGameEngine _engine = SnakeGameEngine();
 
   Timer? _timer;
-
-  final Random _random = Random();
 
   Direction? _nextDirection;
 
@@ -66,22 +62,15 @@ class SnakeGame extends _$SnakeGame {
   }
 
   Duration get _tickDuration {
-    final baseSpeed = switch (state.difficulty) {
-      GameDifficulty.easy => 220,
-      GameDifficulty.normal => 150,
-      GameDifficulty.hard => 90,
-    };
+    final milliseconds = _engine.config.speedFor(
+      difficulty: state.difficulty,
+      level: _level,
+    );
 
-    final speedIncrease = (_level - 1) * 10;
-
-    final milliseconds = baseSpeed - speedIncrease;
-
-    return Duration(milliseconds: milliseconds.clamp(50, 220));
+    return Duration(milliseconds: milliseconds);
   }
 
-  int get _level {
-    return (state.score ~/ 5) + 1;
-  }
+  int get _level => _engine.config.levelForScore(state.score);
 
   void start() {
     if (state.status == GameStatus.gameOver) {

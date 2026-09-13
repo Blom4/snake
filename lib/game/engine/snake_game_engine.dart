@@ -1,15 +1,18 @@
 import 'dart:math';
 
 import 'package:snake/game/config/snake_game_config.dart';
+import 'package:snake/game/engine/game_engine.dart';
+import 'package:snake/game/engine/game_tick_result.dart';
 
 import '../models/direction.dart';
 import '../models/position.dart';
 import '../models/snake_game_state.dart';
 
 import '../events/game_event.dart';
+// ignore: unused_import
 import 'snake_tick_result.dart';
 
-class SnakeGameEngine {
+class SnakeGameEngine implements GameEngine<SnakeGameState> {
   SnakeGameEngine({SnakeGameConfig? config, Random? random})
     : config = config ?? const SnakeGameConfig(),
       _random = random ?? Random();
@@ -63,7 +66,8 @@ class SnakeGameEngine {
     };
   }
 
-  SnakeTickResult tick(SnakeGameState state) {
+  @override
+  GameTickResult<SnakeGameState> tick(SnakeGameState state) {
     final events = <GameEvent>[];
     final newHead = calculateNextHead(state, state.direction);
     final ateFood = newHead == state.food;
@@ -71,7 +75,7 @@ class SnakeGameEngine {
     if (isCollision(state, newHead, willGrow: ateFood)) {
       final newState = state.copyWith(status: GameStatus.gameOver);
       events.add(const GameEvent.gameOver());
-      return SnakeTickResult(state: newState, events: events);
+      return GameTickResult<SnakeGameState>(state: newState, events: events);
     }
 
     final newSnake = [newHead, ...state.snake];
@@ -99,7 +103,7 @@ class SnakeGameEngine {
       events.add(GameEvent.levelChanged(level: newLevel));
     }
 
-    return SnakeTickResult(state: newState, events: events);
+    return GameTickResult<SnakeGameState>(state: newState, events: events);
   }
 
   Position generateFood(List<Position> snake) {

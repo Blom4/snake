@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:snake/game/engine/game_input.dart';
 
 import 'package:snake/game/engine/snake_game_engine.dart';
 import 'package:snake/game/events/game_event.dart';
@@ -30,7 +31,7 @@ void main() {
         status: GameStatus.playing,
       );
 
-      final result = engine.tick(state, Direction.right);
+      final result = engine.tick(state, DirectionInput(Direction.right));
 
       expect(result.state.snake.first.x, 11);
 
@@ -47,7 +48,7 @@ void main() {
         ],
       );
 
-      final result = engine.tick(state, Direction.right);
+      final result = engine.tick(state, DirectionInput(Direction.right));
 
       expect(result.state.status, GameStatus.gameOver);
     });
@@ -58,7 +59,7 @@ void main() {
 
     final state = engine.createInitialState();
 
-    final result = engine.tick(state, Direction.down);
+    final result = engine.tick(state, DirectionInput(Direction.down));
 
     expect(result.state.snake.first, const Position(x: 10, y: 11));
 
@@ -81,7 +82,7 @@ void main() {
       difficulty: GameDifficulty.normal,
     );
 
-    final result = engine.tick(state, Direction.right);
+    final result = engine.tick(state, DirectionInput(Direction.right));
 
     expect(result.state.status, GameStatus.gameOver);
 

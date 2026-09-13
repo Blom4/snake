@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:snake/game/config/snake_game_config.dart';
 import 'package:snake/game/engine/game_engine.dart';
+import 'package:snake/game/engine/game_input.dart';
 import 'package:snake/game/engine/game_tick_result.dart';
 
 import '../models/direction.dart';
@@ -10,7 +11,7 @@ import '../models/snake_game_state.dart';
 
 import '../events/game_event.dart';
 
-class SnakeGameEngine implements GameEngine<SnakeGameState, Direction> {
+class SnakeGameEngine implements GameEngine<SnakeGameState, GameInput> {
   SnakeGameEngine({SnakeGameConfig? config, Random? random})
     : config = config ?? const SnakeGameConfig(),
       _random = random ?? Random();
@@ -65,10 +66,10 @@ class SnakeGameEngine implements GameEngine<SnakeGameState, Direction> {
   }
 
   @override
-  GameTickResult<SnakeGameState> tick(
-    SnakeGameState state,
-    Direction direction,
-  ) {
+  GameTickResult<SnakeGameState> tick(SnakeGameState state, GameInput input) {
+    final direction = switch (input) {
+      DirectionInput(:final direction) => direction,
+    };
     final events = <GameEvent>[];
     final newHead = calculateNextHead(state, direction);
     final ateFood = newHead == state.food;

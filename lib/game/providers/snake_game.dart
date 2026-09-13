@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:snake/game/commands/game_command.dart';
+import 'package:snake/game/engine/game_input.dart';
 import 'package:snake/game/events/game_event.dart';
 
 import '../models/direction.dart';
@@ -130,7 +131,7 @@ class SnakeGame extends _$SnakeGame {
 
     final previousScore = state.score;
 
-    final result = _engine.tick(state, direction);
+    final result = _engine.tick(state, DirectionInput(direction));
 
     state = result.state;
 

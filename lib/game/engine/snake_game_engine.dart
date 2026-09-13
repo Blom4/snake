@@ -1,9 +1,9 @@
-import 'dart:math';
-
 import 'package:snake/game/config/snake_game_config.dart';
 import 'package:snake/game/engine/game_engine.dart';
 import 'package:snake/game/engine/game_input.dart';
 import 'package:snake/game/engine/game_tick_result.dart';
+import 'package:snake/game/random/dart_game_random.dart';
+import 'package:snake/game/random/game_random.dart';
 
 import '../models/direction.dart';
 import '../models/position.dart';
@@ -12,11 +12,12 @@ import '../models/snake_game_state.dart';
 import '../events/game_event.dart';
 
 class SnakeGameEngine implements GameEngine<SnakeGameState, GameInput> {
-  SnakeGameEngine({SnakeGameConfig? config, Random? random})
+  SnakeGameEngine({SnakeGameConfig? config, GameRandom? random})
     : config = config ?? const SnakeGameConfig(),
-      _random = random ?? Random();
+      _random = random ?? DartGameRandom();
+
   final SnakeGameConfig config;
-  final Random _random;
+  final GameRandom _random;
 
   SnakeGameState createInitialState({
     GameDifficulty difficulty = GameDifficulty.normal,
